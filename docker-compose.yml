@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  vprodb:
+    build: 
+      context: ./Docker-files/db
+    image: boltpius/vprofiledb # name of the image once docker file builds the image, which is named in the docker hub repo
+    container_name: vprodb
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbvolume:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=vprodbpass
+
+  vprocache01:
+    image: memcached
+    ports:
+      - "11211:11211"
+
+  vpromq01:
+    image: rabbitmq
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  vproapp:
+    build: 
+      context: ./Docker-files/app
+    image: boltpius/vprofileapp # name of the image once docker file builds the image, which is named in the docker hub repo
+    container_name: vproapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - appvolume:/usr/local/tomcat/webapps # map where the application file is present.
+    
+
+  vproweb:
+    build: 
+      context: ./Docker-files/web
+    image: boltpius/vprofileweb # name of the image once docker file builds the image, which is named in the docker hub repo
+    container_name: vproweb
+    ports:
+      - "80:80"
+
+
+volumes:
+   dbvolume: {} # means create the volume in the dockerengine or docker host 
+   appvolume: {}
