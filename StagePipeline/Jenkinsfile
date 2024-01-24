@@ -107,7 +107,7 @@ pipeline {
         stage("Build App Image") {
             steps {
                 script {
-                    dockerImage = docker.build( ecrRegistry + ":$BUILD_NUMBER", "./Docker-files/app/multistage/Dockerfile") //cthis is going to build the image using the account name and build number as tag which will be saved under dockerImage variable
+                    dockerImage = docker.build( ecrRegistry + ":$BUILD_NUMBER", "../Docker-files/app/multistage/Dockerfile") //cthis is going to build the image using the account name and build number as tag which will be saved under dockerImage variable
                 }
             }
         }
