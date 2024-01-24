@@ -29,6 +29,11 @@ pipeline {
         registryCredential = 'ecr:eu-west-1:awscreds' // this is the format used to access the private registry to store docker images, the 'awscreds' is gotten from jenkins credentials to login to awscli.
         ecrRegistry = '698658878862.dkr.ecr.eu-west-1.amazonaws.com/vprofileprivateregistry' // this is acccount/imagename which is the format for saving an image to a registry 
         vprofileRegistry = "https://698658878862.dkr.ecr.eu-west-1.amazonaws.com" // this is the dockerhub or registry url 
+
+
+        CLUSTER = "vprofilestaging"
+        SERVICE = "vprofile-stage-service" 
+
     }
 
     stages {
@@ -119,6 +124,14 @@ pipeline {
                         dockerImage.push("$BUILD_NUMBER")  // this is going to push the image to your registry using the build number as the tag
                         dockerImage.push('latest') // this is goint to ensure that the pushed image is considered as latest
                     }
+                }
+            }
+        }
+
+        stage('Deploy to ECS Staging') {
+            steps {
+                withAWS(credentials: 'awscreds', region: 'eu-west-1' ) {
+                    sh 'aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --force-new-deployment' // this is going to force delete the container and redeploy the container which will use the latest image built. 
                 }
             }
         }
