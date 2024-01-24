@@ -28,7 +28,7 @@ pipeline {
 
         registryCredential = 'ecr:eu-west-1:awscreds' // this is the format used to access the private registry to store docker images, the 'awscreds' is gotten from jenkins credentials to login to awscli.
         ecrRegistry = '698658878862.dkr.ecr.eu-west-1.amazonaws.com/vprofileprivateregistry' // this is acccount/imagename which is the format for saving an image to a registry 
-        vprofileRegistry = "https:698658878862.dkr.ecr.eu-west-1.amazonaws.com" // this is the dockerhub or registry url 
+        vprofileRegistry = "https://698658878862.dkr.ecr.eu-west-1.amazonaws.com" // this is the dockerhub or registry url 
     }
 
     stages {
