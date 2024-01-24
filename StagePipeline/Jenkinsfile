@@ -24,6 +24,11 @@ pipeline {
 
         SONARSERVER = 'sonarserver' //server name saved under system in jenkins 
         SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
+
+
+        registryCredential = 'ecr:eu-west-1:awscreds' // this is the format used to access the private registry to store docker images, the 'awscreds' is gotten from jenkins credentials to login to awscli.
+        ecrRegistry = '698658878862.dkr.ecr.eu-west-1.amazonaws.com/vprofileprivateregistry' // this is acccount/imagename which is the format for saving an image to a registry 
+        vprofileRegistry = "698658878862.dkr.ecr.eu-west-1.amazonaws.com" // this is the dockerhub or registry url 
     }
 
     stages {
@@ -98,6 +103,27 @@ pipeline {
                         )
             }
         }
+
+        stage("Build App Image") {
+            steps {
+                script {
+                    dockerImage = docker.build( ecrRegistry + ":$BUILD_NUMBER", "./Docker-files/app/multistage/Dockerfile") //cthis is going to build the image using the account name and build number as tag which will be saved under dockerImage variable
+                }
+            }
+        }
+
+        stage("Upload App Image") {
+            steps {     
+                script {
+                    docker.withRegistry( vprofileRegistry, registryCredential ) { // this is going to log into your account using the credentials saved in the variable
+                        dockerImage.push("$BUILD_NUMBER")  // this is going to push the image to your registry using the build number as the tag
+                        dockerImage.push('latest') // this is goint to ensure that the pushed image is considered as latest
+                    }
+                }
+            }
+        }
+
+
     }
     post {
         always {
