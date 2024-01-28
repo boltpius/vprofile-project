@@ -32,7 +32,7 @@ pipeline {
 
 
         CLUSTER = "cicd-staging-jenkins"
-        SERVICE = "" 
+        SERVICE = "cidcd-jenkins-service" 
 
     }
 
