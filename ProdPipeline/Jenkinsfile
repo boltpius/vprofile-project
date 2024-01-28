@@ -7,29 +7,29 @@ def COLOR_MAP = [
 pipeline {
     agent any 
     environment {
-        CLUSTER = "vprofile-production"
-        SERVICE = "vprofile-production-ecs" 
+        CLUSTER = "cicd-production-jenkins"
+        SERVICE = "cicd-prodcution-service" 
     }
 
     stages {
  // this is production so we are only deploying everything that was tested in staging
         stage('Deploy to ECS Prod') {
             steps {
-                withAWS(credentials: 'awscreds', region: 'eu-west-1' ) {
+                withAWS(credentials: 'awscred', region: 'eu-west-1' ) {
                     sh 'aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --force-new-deployment' // this is going to force delete the container and redeploy the container which will use the latest image built. 
                 }
             }
         }
 
     }
-    post {
-        always {
-            echo 'Slack Notifications.'
-            slackSend channel: '#jenkinscicd',
-                color: COLOR_MAP[currentBuild.currentResult],
-                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
-        }
-    }
+    // post {
+    //     always {
+    //         echo 'Slack Notifications.'
+    //         slackSend channel: '#jenkinscicd',
+    //             color: COLOR_MAP[currentBuild.currentResult],
+    //             message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+    //     }
+    // }
 }
 
 
