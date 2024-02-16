@@ -22,8 +22,11 @@ pipeline {
         NEXUS_GRP_REPO = 'vprofile-maven-group'
         NEXUS_LOGIN = 'nexuslogin' // from credentials in jenkins
 
+	NEXUS_PASS = credentials('nexuspass')
+
         SONARSERVER = 'sonarserver' //server name saved under system in jenkins 
         SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
+
     }
 
     stages {
@@ -98,6 +101,30 @@ pipeline {
                         )
             }
         }
+
+        stage("") {
+		steps {
+			ansiblePlaybook([
+				inventory : '',
+				playbook : 'ansible/site.yml',
+				installation : 'ansible', 
+				colorized : true,
+				credentialsId: 'app01-staging',
+				disableHostKeyChecking: true,
+				extraVars : [
+					USER: "admin",
+					PASS: "${NEXUS_PASS}",
+					nexusip: "10.0.0.235",
+					reponame: "vprofile-release",
+					groupid: "QA",
+					time: "${env.BUILD_TIMESTAMP}",
+					build: "${env.BUILD_ID}",
+					artifactid: "vproapp",
+					vprofile_version: "vproapp-${env.BUILD_ID}-${env.BUILD_TIMESTAMP}.war"
+				]
+			])
+		}
+	}
     }
     // post {
     //     always {
