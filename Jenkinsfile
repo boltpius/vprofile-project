@@ -35,7 +35,7 @@ pipeline {
         stage("Ansible Deploy to Prod") {
 		steps {
 			ansiblePlaybook([
-				inventory : 'ansible/stage.inventory.yml',
+				inventory : 'ansible/prod.inventory.yml',
 				playbook : 'ansible/site.yml',
 				installation : 'ansible', 
 				colorized : true,
