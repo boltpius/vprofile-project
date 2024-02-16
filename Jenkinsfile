@@ -22,7 +22,7 @@ pipeline {
         NEXUS_GRP_REPO = 'vprofile-maven-group'
         NEXUS_LOGIN = 'nexuslogin' // from credentials in jenkins
 
-	NEXUS_PASS = credentials('nexuspass')
+	NEXUSPASS = credentials('nexuspass')
 
         SONARSERVER = 'sonarserver' //server name saved under system in jenkins 
         SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
@@ -113,7 +113,7 @@ pipeline {
 				disableHostKeyChecking: true,
 				extraVars : [
 					USER: "admin",
-					PASS: "${NEXUS_PASS}",
+					PASS: "${NEXUSPASS}",
 					nexusip: "10.0.0.235",
 					reponame: "vprofile-release",
 					groupid: "QA",
