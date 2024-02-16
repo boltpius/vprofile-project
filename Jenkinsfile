@@ -102,7 +102,7 @@ pipeline {
             }
         }
 
-        stage("") {
+        stage("Ansible Deploy to staging") {
 		steps {
 			ansiblePlaybook([
 				inventory : 'ansible/stage.inventory.yml',
@@ -113,7 +113,7 @@ pipeline {
 				disableHostKeyChecking: true,
 				extraVars : [
 					USER: "admin",
-					PASS: "pius",
+					PASS: "${NEXUSPASS}",
 					nexusip: "10.0.0.235",
 					reponame: "vprofile-release",
 					groupid: "QA",
