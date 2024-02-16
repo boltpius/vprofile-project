@@ -6,103 +6,33 @@ def COLOR_MAP = [
 
 pipeline {
     agent any 
-    tools {
-        maven "MAVEN3"
-        jdk "OracleJDK11"
-    }
-
     environment {
-        SNAP_REPO = 'vprofile-snapshot'
-        NEXUS_USER = 'admin' // to login to nexus using username and password 
-        NEXUS_PASS = 'pius'
-        RELEASE_REPO = 'vprofile-release'
-        CENTRAL_REPO = 'vpro-maven-central'
-        NEXUSIP = '10.0.0.235'  // nexus server private ip 
-        NEXUSPORT = '8081'
-        NEXUS_GRP_REPO = 'vprofile-maven-group'
-        NEXUS_LOGIN = credentials('nexuslogin') // from credentials in jenkins
-
 	NEXUSPASS = 'nexuspass'
-
-        SONARSERVER = 'sonarserver' //server name saved under system in jenkins 
-        SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
 
     }
 
     stages {
-        stage('Build') {
-            steps {
-                sh 'mvn -s settings.xml -DskipTests install' // this basically downloads the dependencies from nexus maven repo and skip unit test with the -d flag 
-            }
-            post { 
-                success {
-                    echo  "Now Archiving..."
-                    archiveArtifacts artifacts: '**/*.war'   // this basically run a post step once the stage is sucessful to archive the arifact and the archiveArtifacts pluguns need to be installed to work, so it checks for all files ending with .war and archive it.
-                 }
-            }
-        }
 
-        stage('Test') {
-            steps {
-                sh 'mvn  -s settings.xml test' // This stage is basically to perform unit test which will generate a report that will later be uploaded to sonarqube 
-            }
-        }
+	stage('Setup parameters') {
+		steps {
+			script {
+				properties([
+					parameters([
+						string(
+							defaultValue: '',
+							name: 'BUILD',
+						),
+						string(
+							defaultValue: '',
+							name: 'TIME',
+						)
+					])
+				])
+			}
+		}
+	}
 
-        stage('Checkstyle Analysis') {
-            steps {
-                sh 'mvn  -s settings.xml checkstyle:checkstyle' //this uses checkstyle under maven a code analysis tool which will check for any issues with your code and suggest best practices, vulnerabilities. 
-            }
-        }
-
-        stage('Sonar Analysis') {
-            environment {
-                scannerHome = tool "${SONARSCANNER}"  // storing the global variable in the local variable scannerHome 
-            }
-            steps {
-               withSonarQubeEnv("${SONARSERVER}") {  // this is using the variable to pass the value stored in it as the sonar server name saved  under systems in jenkins. this also scans for the unit test report and the checkstyle reports as well. SCans the code and takes the report to the sonar server.
-                   sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
-                   -Dsonar.projectName=vprofile \
-                   -Dsonar.projectVersion=1.0 \
-                   -Dsonar.sources=src/ \
-                   -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                   -Dsonar.junit.reportsPath=target/surefire-reports/ \
-                   -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                   -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-              }
-            }
-        }
-
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
-                    // true = set pipeline to UNSTABLE, false = don't
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        stage("UploadArtifact") {
-            steps {
-                nexusArtifactUploader(
-                            nexusVersion: 'nexus3', //the nexus current version 
-                            protocol: 'http', //protocol used 
-                            nexusUrl: "${NEXUSIP}:${NEXUSPORT}", //url to access your nexus server.
-                            groupId: 'QA',
-                            version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}", // the version to give the artifact being built
-                            repository: "${RELEASE_REPO}", // the release repo on nexus to store the artifact 
-                            credentialsId: "${NEXUS_LOGIN}", // credientials saved in jenkins for nexus access 
-                            artifacts: [
-                                [artifactId: 'vproapp', // artifact name
-                                classifier: '',
-                                file: 'target/vprofile-v2.war', //artifact you want to upload 
-                                type: 'war'] 
-                            ]
-                        )
-            }
-        }
-
-        stage("Ansible Deploy to staging") {
+        stage("Ansible Deploy to Prod") {
 		steps {
 			ansiblePlaybook([
 				inventory : 'ansible/stage.inventory.yml',
@@ -117,10 +47,10 @@ pipeline {
 					nexusip: "10.0.0.235",
 					reponame: "vprofile-release",
 					groupid: "QA",
-					time: "${env.BUILD_TIMESTAMP}",
-					build: "${env.BUILD_ID}",
+					time: "${env.BUILD_TIME}",
+					build: "${env.BUILD}",
 					artifactid: "vproapp",
-					vprofile_version: "vproapp-${env.BUILD_ID}-${env.BUILD_TIMESTAMP}.war"
+					vprofile_version: "vproapp-${env.BUILD}-${env.BUILD_TIME}.war"
 				]
 			])
 		}
