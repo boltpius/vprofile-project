@@ -22,7 +22,7 @@ pipeline {
         NEXUS_GRP_REPO = 'vprofile-maven-group'
         NEXUS_LOGIN = 'nexuslogin' // from credentials in jenkins
 
-	NEXUSPASS = credentials('nexuspass')
+	NEXUSPASS = 'nexuspass'
 
         SONARSERVER = 'sonarserver' //server name saved under system in jenkins 
         SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
