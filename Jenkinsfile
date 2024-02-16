@@ -20,7 +20,7 @@ pipeline {
         NEXUSIP = '10.0.0.235'  // nexus server private ip 
         NEXUSPORT = '8081'
         NEXUS_GRP_REPO = 'vprofile-maven-group'
-        NEXUS_LOGIN = credentials('nexuslogin') // from credentials in jenkins
+        NEXUS_LOGIN = 'nexuslogin' // from credentials in jenkins
 
 	NEXUSPASS = 'nexuspass'
 
