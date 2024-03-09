@@ -22,8 +22,16 @@ pipeline {
         NEXUS_GRP_REPO = 'vprofile-maven-group'
         NEXUS_LOGIN = 'nexuslogin' // from credentials in jenkins
 
+        AWS_REGION = 'eu-west-1'
+
         SONARSERVER = 'sonarserver' //server name saved under system in jenkins 
         SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
+        
+        ARTIFACT_NAME = "vprofile-v${BUILD_ID}.war"
+        AWS_S3_BUCKET = 'cicd-jenkins-s3'
+        AWS_EB_APP_NAME = 'hybridcicd'
+        AWS_EB_ENVIRONMENT = 'Hybridcicd-env'
+        AWS_EB_APP_VERSION = "pius${BUILD_ID}"
     }
 
     stages {
@@ -96,6 +104,14 @@ pipeline {
                                 type: 'war'] 
                             ]
                         )
+            }
+        }
+
+        stage("Deploy to stage Beanstalk") {
+            withAWS(credentials: 'awsbeancreds', region: ${AWS_REGION}) {
+                sh 'aws s3 cp ./target/vprofile-v2.war s3://$AWS_S3_BUCKET/$ARTIFACT_NAME'
+                sh 'aws elasticbeanstalk  create-application-version --application-name $AWS_EB_APP_NAME —version-label $AWS_EB_APP_VERSION --source-bundle S3Bucket=$AWS_S3_BUCKET,S3Key=$ARTIFACT_NAME'
+                sh 'aws elasticbeanstalk update-enviorment --application-name $AWS_EB_APP_NAME --environment-name $AWS_EB_ENVIORNMENT —version-label $AWS_EB_APP_VERSION' 
             }
         }
     }
