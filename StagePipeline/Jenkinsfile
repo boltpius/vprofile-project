@@ -31,8 +31,8 @@ pipeline {
         vprofileRegistry = "https://698658878862.dkr.ecr.eu-west-1.amazonaws.com" // this is the dockerhub or registry url 
 
 
-        CLUSTER = "cicd-staging-jenkins"
-        SERVICE = "cidcd-jenkins-service" 
+        CLUSTER = "vprofilestaging"
+        SERVICE = "staging-jenkinscicd" 
 
     }
 
@@ -130,7 +130,7 @@ pipeline {
 
         stage('Deploy to ECS Staging') {
             steps {
-                withAWS(credentials: 'awscred', region: 'eu-west-1' ) {
+                withAWS(credentials: 'awscreds, region: 'eu-west-1' ) {
                     sh 'aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --force-new-deployment' // this is going to force delete the container and redeploy the container which will use the latest image built. 
                 }
             }
