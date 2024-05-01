@@ -26,7 +26,7 @@ pipeline {
         SONARSCANNER = 'sonarscanner' // UNDER tool in jenkins, the name of the scanner tool added under global tool in jenkins. 
 
 
-        registryCredential = 'ecr:eu-west-1:awscred' // this is the format used to access the private registry to store docker images, the 'awscreds' is gotten from jenkins credentials to login to awscli.
+        registryCredential = 'ecr:eu-west-1:awscreds' // this is the format used to access the private registry to store docker images, the 'awscreds' is gotten from jenkins credentials to login to awscli.
         ecrRegistry = '698658878862.dkr.ecr.eu-west-1.amazonaws.com/cicd-jenkins' // this is acccount/imagename which is the format for saving an image to a registry 
         vprofileRegistry = "https://698658878862.dkr.ecr.eu-west-1.amazonaws.com" // this is the dockerhub or registry url 
 
